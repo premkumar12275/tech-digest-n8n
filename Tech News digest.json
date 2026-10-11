@@ -1,0 +1,672 @@
+{
+  "name": "Tech News digest",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 7
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        0
+      ],
+      "id": "5ca4b168-67bd-46d8-b222-782d2e41e361",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "url": "https://dev.to/api/articles?tag=ai&top=1",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        240,
+        -176
+      ],
+      "id": "b2b658af-5225-4574-92d3-7c437fea4c97",
+      "name": "dev.to"
+    },
+    {
+      "parameters": {
+        "url": "https://newsapi.org/v2/everything?q=AI+OR+cloud+OR+cybersecurity+OR+software&language=en&sortBy=publishedAt&pageSize=20",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "apiKey",
+              "value": "YOUR_NEWSAPI_KEY"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        224,
+        208
+      ],
+      "id": "1c780046-2283-4b12-ba18-6a3266d98bc2",
+      "name": "NewsApi"
+    },
+    {
+      "parameters": {
+        "url": "https://hn.algolia.com/api/v1/search?tags=front_page",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        224,
+        0
+      ],
+      "id": "11747afb-0fb8-4aff-ae8f-6be85574df9d",
+      "name": "HackerNews"
+    },
+    {
+      "parameters": {
+        "url": "https://techcrunch.com/feed/ ",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        256,
+        -400
+      ],
+      "id": "0cad78ef-eb35-42f6-b214-6761bf5950ba",
+      "name": "TechCrunch RSS Read"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "hits",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        448,
+        0
+      ],
+      "id": "64f8786e-c7c1-4a08-9024-0788e36601be",
+      "name": "HN Split Out"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "articles",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        448,
+        208
+      ],
+      "id": "cf4aad87-d1e6-43b3-9486-347799a92a7f",
+      "name": "news API Split Out"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6f071cf7-412a-4f74-a5dd-08303955a5d3",
+              "name": "source",
+              "value": "Hacker News",
+              "type": "string"
+            },
+            {
+              "id": "c9119404-89a2-4c25-a8a0-c8c3ae33bd10",
+              "name": "title",
+              "value": "={{ $json.title }}",
+              "type": "string"
+            },
+            {
+              "id": "63bda637-b5be-4b6b-92ee-c48e6f56c8b5",
+              "name": "url",
+              "value": "={{ $json.url || 'https://news.ycombinator.com/item?id=' + $json.objectID }} ",
+              "type": "string"
+            },
+            {
+              "id": "e0e030a0-1b7b-4d66-b1ff-1d5af3a16c1f",
+              "name": "published_at",
+              "value": "={{ $json.created_at }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        672,
+        0
+      ],
+      "id": "69a10821-faa2-4a4c-9981-4330de832595",
+      "name": "HN Edit Fields"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6605f97d-d157-48de-8365-3e00b6eebe33",
+              "name": "source",
+              "value": "NewsAPI",
+              "type": "string"
+            },
+            {
+              "id": "1c0666b3-bffb-46b8-8b66-dc21999a1a24",
+              "name": "title",
+              "value": "={{ $json.title }}",
+              "type": "string"
+            },
+            {
+              "id": "65f7f05e-645b-4711-8eb6-10b0a7537477",
+              "name": "url",
+              "value": "={{ $json.url }}",
+              "type": "string"
+            },
+            {
+              "id": "5125eeb4-7055-4976-8263-8eb786b06278",
+              "name": "published_at",
+              "value": "={{ $json.publishedAt }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        672,
+        208
+      ],
+      "id": "e7227687-49c2-4825-b55c-5d4225d30a5e",
+      "name": "News API Edit Fields"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "0f3c17d2-7d25-4804-b4e5-96eff9d8b39d",
+              "name": "source",
+              "value": "TechCrunch RSS",
+              "type": "string"
+            },
+            {
+              "id": "c6924352-f2f3-4bfd-901e-9ef008b93459",
+              "name": "title",
+              "value": "={{ $json.title }}",
+              "type": "string"
+            },
+            {
+              "id": "cd3b9d2b-33a8-4e71-801a-bc62e3e12b2e",
+              "name": "url",
+              "value": "={{ $json.link }}",
+              "type": "string"
+            },
+            {
+              "id": "1c5c756c-58ca-4480-98cf-5b4fa8aafdd2",
+              "name": "published_at",
+              "value": "={{ $json.pubDate || $json.isoDate }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        480,
+        -400
+      ],
+      "id": "f743a0b7-ccd5-4774-b4f1-cd135f073b24",
+      "name": "TechCrunch Edit Fields"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c0b07c4d-1951-4ff5-b51e-5e99eeee8fa7",
+              "name": "source",
+              "value": "Dev.to",
+              "type": "string"
+            },
+            {
+              "id": "83873abd-eb86-4b31-8d14-6252de1cf37a",
+              "name": "title",
+              "value": "={{ $json.title }}",
+              "type": "string"
+            },
+            {
+              "id": "558b3263-8c8c-4f4c-b346-605e8317566d",
+              "name": "url",
+              "value": "={{ $json.url }}",
+              "type": "string"
+            },
+            {
+              "id": "9737a05a-6e72-40d2-bbc4-0039256ad2d3",
+              "name": "published_at",
+              "value": "={{ $json.published_at }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        464,
+        -176
+      ],
+      "id": "db7bf2ac-b26d-4663-9cb4-95c2a35c444f",
+      "name": "devto Edit Fields"
+    },
+    {
+      "parameters": {
+        "numberInputs": 4
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        976,
+        -128
+      ],
+      "id": "2543e059-b3f5-49f0-ae06-540585e00a2f",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "compare": "selectedFields",
+        "fieldsToCompare": "url",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.removeDuplicates",
+      "typeVersion": 2,
+      "position": [
+        1200,
+        -96
+      ],
+      "id": "9221c5be-01e3-4f7f-bf95-e6717805686a",
+      "name": "Remove Duplicates"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "destinationFieldName": "items",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        1424,
+        -96
+      ],
+      "id": "1a0a4c82-f2e5-48b7-8e61-3a5b9978c0dd",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b0989e1f-3f6e-4859-bac0-ef54266d4dd2",
+              "name": "prompt_text",
+              "value": "={{ $json.items.map(i => `[${i.source}] ${i.title} (${i.url})`).join('\\n') }} ",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1648,
+        -96
+      ],
+      "id": "caf2b432-02c4-4389-a371-d515f28cbe92",
+      "name": "Prompt Text Edit Fields"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ model: \"openai/gpt-oss-120b\", messages: [{ role: \"user\", content: \"You are curating a daily tech news digest covering these topics: AI/ML, Software Engineering, Cloud/DevOps, Cybersecurity. From the article list below, select the 4-5 most interesting and relevant items PER TOPIC (max 20 total), skipping anything irrelevant or low-quality. For each selected item, write a 1-2 sentence summary explaining why it matters. Return ONLY valid JSON, no markdown formatting, no commentary, in exactly this shape: [{\\\"topic\\\": \\\"...\\\", \\\"title\\\": \\\"...\\\", \\\"url\\\": \\\"...\\\", \\\"summary\\\": \\\"...\\\"}]\\n\\nArticles:\\n\" + $json.prompt_text }], temperature: 0.3, max_tokens:8000 }) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1872,
+        -96
+      ],
+      "id": "b63d9ed1-2134-492a-a495-93a435e4b30a",
+      "name": "LLM Summarize",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "qXflxHS6ilWovatZ",
+          "name": "Header Auth groq"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d0a51281-7617-4216-8521-d4e820305732",
+              "name": "digest_items",
+              "value": "={{ JSON.parse($json.choices[0].message.content) }}",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        2096,
+        -96
+      ],
+      "id": "24bd60b8-da40-4340-9f2b-4fccf5939ca2",
+      "name": "Parse Digest"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "40113a9a-11de-4f36-8999-6b9bfb304ec8",
+              "name": "email_html",
+              "value": "={{ (() => { const items = $json.digest_items; const topics = [...new Set(items.map(i => i.topic))]; let html = '<h1>Your Tech Digest</h1>'; for (const topic of topics) { html += `<h2>${topic}</h2>`; const topicItems = items.filter(i => i.topic === topic); for (const item of topicItems) { html += `<p><a href=\"${item.url}\">${item.title}</a><br>${item.summary}</p>`; } } return html; })() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        2320,
+        -96
+      ],
+      "id": "8c698ee2-598a-43d0-8f27-53e21330b4d0",
+      "name": "Build Email HTML"
+    },
+    {
+      "parameters": {
+        "fromEmail": "FROM EMAIL",
+        "toEmail": "TO EMAIL",
+        "subject": "=Your Daily Tech Digest — {{ $now.format('yyyy-MM-dd') }}",
+        "html": "={{ $json.email_html }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        2544,
+        -96
+      ],
+      "id": "312e4967-9799-40c7-941d-84a2dc7c2d5c",
+      "name": "Send an Email",
+      "webhookId": "a0a3b453-c115-405c-b91b-944b80da9f5b",
+      "credentials": {
+        "smtp": {
+          "id": "3bJlHw3Y9WQq6pbg",
+          "name": "Gmail SMTP"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "HackerNews",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "NewsApi",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "dev.to",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "TechCrunch RSS Read",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HackerNews": {
+      "main": [
+        [
+          {
+            "node": "HN Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "NewsApi": {
+      "main": [
+        [
+          {
+            "node": "news API Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HN Split Out": {
+      "main": [
+        [
+          {
+            "node": "HN Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "news API Split Out": {
+      "main": [
+        [
+          {
+            "node": "News API Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "dev.to": {
+      "main": [
+        [
+          {
+            "node": "devto Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "TechCrunch RSS Read": {
+      "main": [
+        [
+          {
+            "node": "TechCrunch Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HN Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "News API Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "devto Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "TechCrunch Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Remove Duplicates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Remove Duplicates": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "Prompt Text Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prompt Text Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "LLM Summarize",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LLM Summarize": {
+      "main": [
+        [
+          {
+            "node": "Parse Digest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Digest": {
+      "main": [
+        [
+          {
+            "node": "Build Email HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Email HTML": {
+      "main": [
+        [
+          {
+            "node": "Send an Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "122047c4-7824-4801-ab8c-48989c341b2d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "9e99919821c3ef92dfa920781836a933bf9a634620a2e6b27f0086fde8a5a8ee"
+  },
+  "nodeGroups": [],
+  "id": "qpxPENfjk1YZuhOM",
+  "tags": []
+}
