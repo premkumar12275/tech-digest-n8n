@@ -85,3 +85,15 @@ To add a source, add a fetch node plus a Set node that outputs the same four fie
 - **No memory between runs.** A story that stays on a front page for two days can appear in two digests.
 - **`published_at` is collected but unused.** Items are not filtered or sorted by age.
 - **Unescaped HTML.** Titles and summaries are inserted into the email as-is.
+
+## Committing changes safely
+
+Workflow exports from n8n contain your literal NewsAPI key and email addresses. A pre-commit hook strips them from any staged workflow JSON and re-stages the cleaned file. Enable it once per clone:
+
+```sh
+git config core.hooksPath .githooks
+```
+
+You can also run the sanitizer by hand: `scripts/sanitize_workflow.py "Tech News digest.json"`. Add `--check` to only report, without editing. It replaces secret-looking parameters (`apiKey`, `token`, `password`, ...) with placeholders such as `YOUR_NEWSAPI_KEY`, resets the From/To email fields to `FROM EMAIL` / `TO EMAIL`, replaces any other email address with `you@example.com`, clears `pinData` and removes `meta.instanceId`. If it still finds a known token format (for example `gsk_...` or `sk-...`), the commit is aborted.
+
+The hook edits the file in place, so after committing, the local copy holds placeholders. Your n8n instance keeps the real values.

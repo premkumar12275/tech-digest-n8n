@@ -140,6 +140,12 @@
               "name": "published_at",
               "value": "={{ $json.created_at }}",
               "type": "string"
+            },
+            {
+              "id": "23851852-e231-4519-928d-b992f7b981c4",
+              "name": "image_url",
+              "value": "",
+              "type": "string"
             }
           ]
         },
@@ -180,6 +186,12 @@
               "id": "5125eeb4-7055-4976-8263-8eb786b06278",
               "name": "published_at",
               "value": "={{ $json.publishedAt }}",
+              "type": "string"
+            },
+            {
+              "id": "a891f6e3-ce43-4f9f-bcd1-f26913fded1f",
+              "name": "image_url",
+              "value": "={{ $json.urlToImage || '' }}",
               "type": "string"
             }
           ]
@@ -222,6 +234,12 @@
               "name": "published_at",
               "value": "={{ $json.pubDate || $json.isoDate }}",
               "type": "string"
+            },
+            {
+              "id": "4acfeb44-9b44-4e6d-864f-23df9e19e2fd",
+              "name": "image_url",
+              "value": "={{ $json.enclosure?.url || '' }}",
+              "type": "string"
             }
           ]
         },
@@ -262,6 +280,12 @@
               "id": "9737a05a-6e72-40d2-bbc4-0039256ad2d3",
               "name": "published_at",
               "value": "={{ $json.published_at }}",
+              "type": "string"
+            },
+            {
+              "id": "ac3033b7-29c5-4521-8285-d9ad7d08e2ee",
+              "name": "image_url",
+              "value": "={{ $json.cover_image || $json.social_image || '' }}",
               "type": "string"
             }
           ]
@@ -351,7 +375,7 @@
         "genericAuthType": "httpHeaderAuth",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({ model: \"openai/gpt-oss-120b\", messages: [{ role: \"user\", content: \"You are curating a daily tech news digest covering these topics: AI/ML, Software Engineering, Cloud/DevOps, Cybersecurity. From the article list below, select the 4-5 most interesting and relevant items PER TOPIC (max 20 total), skipping anything irrelevant or low-quality. For each selected item, write a 1-2 sentence summary explaining why it matters. Return ONLY valid JSON, no markdown formatting, no commentary, in exactly this shape: [{\\\"topic\\\": \\\"...\\\", \\\"title\\\": \\\"...\\\", \\\"url\\\": \\\"...\\\", \\\"summary\\\": \\\"...\\\"}]\\n\\nArticles:\\n\" + $json.prompt_text }], temperature: 0.3, max_tokens:8000 }) }}",
+        "jsonBody": "={{ JSON.stringify({ model: \"openai/gpt-oss-120b\", messages: [{ role: \"user\", content: \"You are curating a daily tech news digest covering these topics: AI/ML, Software Engineering, Cloud/DevOps, Cybersecurity, Consumer Tech & Automotive. From the article list below, select the 4-5 most interesting and relevant items PER TOPIC (max 30 total), skipping anything irrelevant or low-quality. For each selected item, write a 1-2 sentence summary explaining why it matters. Return ONLY valid JSON, no markdown formatting, no commentary, in exactly this shape: [{\\\"topic\\\": \\\"...\\\", \\\"title\\\": \\\"...\\\", \\\"url\\\": \\\"...\\\", \\\"summary\\\": \\\"...\\\"}]\\n\\nArticles:\\n\" + $json.prompt_text }], temperature: 0.3, max_tokens:12000 }) }}",
         "options": {}
       },
       "type": "n8n-nodes-base.httpRequest",
@@ -399,7 +423,7 @@
             {
               "id": "40113a9a-11de-4f36-8999-6b9bfb304ec8",
               "name": "email_html",
-              "value": "={{ (() => { const items = $json.digest_items; const topics = [...new Set(items.map(i => i.topic))]; let html = '<h1>Your Tech Digest</h1>'; for (const topic of topics) { html += `<h2>${topic}</h2>`; const topicItems = items.filter(i => i.topic === topic); for (const item of topicItems) { html += `<p><a href=\"${item.url}\">${item.title}</a><br>${item.summary}</p>`; } } return html; })() }}",
+              "value": "={{ (() => {\n  const items = $json.digest_items;\n  const allItems = $('Aggregate').first().json.items;\n  const topics = [...new Set(items.map(i => i.topic))];\n  let html = '<h1>Your Tech Digest</h1>';\n  for (const topic of topics) {\n    html += `<h2>${topic}</h2>`;\n    const topicItems = items.filter(i => i.topic === topic);\n    for (const item of topicItems) {\n      const match = allItems.find(a => a.url === item.url);\n      const img = (match && match.image_url)\n        ? `<img src=\"${match.image_url}\" style=\"width:100%;max-width:400px;height:180px;object-fit:cover;border-radius:6px;display:block;margin-bottom:8px;\" />`\n        : '';\n      html += `<div style=\"margin-bottom:20px;\">${img}<p><a href=\"${item.url}\"><strong>${item.title}</strong></a><br>${item.summary}</p></div>`;\n    }\n  }\n  return html;\n})() }}",
               "type": "string"
             }
           ]
@@ -661,10 +685,9 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "122047c4-7824-4801-ab8c-48989c341b2d",
+  "versionId": "5d05ebb1-d438-4cad-94a4-14ce3ff1f62b",
   "meta": {
-    "templateCredsSetupCompleted": true,
-    "instanceId": "9e99919821c3ef92dfa920781836a933bf9a634620a2e6b27f0086fde8a5a8ee"
+    "templateCredsSetupCompleted": true
   },
   "nodeGroups": [],
   "id": "qpxPENfjk1YZuhOM",

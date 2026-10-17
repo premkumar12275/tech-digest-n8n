@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+# Sanitize staged n8n workflow exports before they are committed.
+# Enable once per clone with:  git config core.hooksPath .githooks
+
+repo_root=$(git rev-parse --show-toplevel)
+sanitizer="$repo_root/scripts/sanitize_workflow.py"
+status=0
+
+git diff --cached --name-only --diff-filter=ACM -z -- '*.json' |
+while IFS= read -r -d '' file; do
+  python3 "$sanitizer" "$repo_root/$file" || exit 1
+  git add -- "$repo_root/$file"
+done || status=1
+
+if [ "$status" -ne 0 ]; then
+  echo "pre-commit: possible secrets remain, commit aborted. Fix the file and retry." >&2
+fi
+exit $status
